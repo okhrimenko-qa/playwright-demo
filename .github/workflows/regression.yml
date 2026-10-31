@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: regression-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   regression:
     name: Regression
@@ -19,7 +23,6 @@ jobs:
       TESTOMATIO_TITLE: 'Regression #${{ github.run_number }} - ${{ github.head_ref || github.ref_name }}'
     steps:
       - uses: actions/checkout@v7
-      # Started first, so the containers warm up while dependencies install.
       - name: Start Toolshop
         run: docker compose up -d --quiet-pull
       - uses: actions/setup-node@v7

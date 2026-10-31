@@ -1,7 +1,6 @@
 import { existsSync } from 'node:fs';
 import { defineConfig, devices, type ReporterDescription } from '@playwright/test';
 import { defaultToolshopApiUrl, defaultToolshopUrl } from './constants';
-import { TestOptions } from 'node:test';
 
 if (existsSync('.env')) {
   process.loadEnvFile('.env');
@@ -19,7 +18,7 @@ if (process.env.TESTOMATIO) {
   reporter.push(['@testomatio/reporter/playwright']);
 }
 
-export default defineConfig<TestOptions>({
+export default defineConfig({
   testDir: './specs',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,

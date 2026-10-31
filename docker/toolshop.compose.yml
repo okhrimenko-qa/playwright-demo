@@ -16,8 +16,11 @@ services:
     ports:
       - 4200:4200
 
+  # Same as the Toolshop web image, which is published for arm64 only and fails on x86 runners.
   web:
-    image: testsmith/practice-software-testing-web@sha256:950bafdc86501002c381e35d9b70e298fe211f4ab1fbfda334b67f03dffa048d
+    image: nginx:1.23.3-alpine
+    volumes:
+      - ./vhost.conf:/etc/nginx/conf.d/default.conf:ro
     ports:
       - 8091:80
     depends_on:

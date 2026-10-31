@@ -62,7 +62,7 @@ and assert against values from `test-data/`.
   registers a fresh user per test. `login` builds on it and logs in through the UI.
 - `helpers/apiHelper.ts`: API calls, one method per endpoint. Declare the response type here with
   the generic (`request.post<T>()`, `Promise<APIResponse<T>>`), so specs get a typed `json()` without `as`.
-- `helpers/users.ts`: generators of unique test data.
+- `helpers/commonHelper.ts`: generators of unique test data.
 - `pages/`: page objects; `pages/fragments/`: parts shared by several pages, composed into a page
   object as a field (`accountPage.navBar`).
 - `test-data/<api|e2e>/<module>/`: expected values, one file per spec mirroring its path, as a
