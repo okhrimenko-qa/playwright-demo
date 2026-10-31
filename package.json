@@ -5,16 +5,25 @@
   "main": "index.js",
   "scripts": {
     "test": "playwright test",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint --max-warnings=0 .",
     "tms:push": "check-tests push -d test-cases",
-    "tms:pull": "check-tests pull -d test-cases"
+    "tms:pull": "check-tests pull -d test-cases",
+    "tms:import": "check-tests playwright \"specs/**/*.spec.ts\" --typescript --no-detached"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.64.1",
+    "@testomatio/reporter": "^2.21.0",
     "@types/node": "^26.6.5",
-    "check-tests": "^0.22.2"
+    "check-tests": "^0.22.2",
+    "eslint": "^10.13.0",
+    "eslint-plugin-playwright": "^2.12.1",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.1"
   }
 }

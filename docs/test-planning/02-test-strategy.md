@@ -79,7 +79,7 @@ at feature level, with setup through the API, keeps the suite fast and stable. F
 reserved for the few flows where an integration failure would cost the most (P-01).
 
 The distinction is a classification for planning and reporting. In the code, both kinds live in
-`tests/e2e/` and are told apart by the `@ui` / `@e2e` tag (see §7).
+`specs/e2e/` and are told apart by the `@ui` / `@e2e` tag (see §7).
 
 ## 5. Test types
 
@@ -114,14 +114,14 @@ The distinction is a classification for planning and reporting. In the code, bot
 | Concern | Decision |
 |---------|----------|
 | Language / runner | TypeScript + `@playwright/test` (one runner for UI and API) |
-| Structure | `tests/api/<module>` for API tests; `tests/e2e/<module>` for **all browser tests**, UI feature tests and full journeys alike. The level is set by a tag (`@ui` or `@e2e`), not by the folder, so a separate folder for 3 journeys isn't needed and `--grep @e2e` still runs them on their own. Page Object Model in `src/pages`, API clients in `src/api` |
+| Structure | `specs/api/<module>` for API tests; `specs/e2e/<module>` for **all browser tests**, UI feature tests and full journeys alike. The level is set by a tag (`@ui` or `@e2e`), not by the folder, so a separate folder for 3 journeys isn't needed and `--grep @e2e` still runs them on their own. Page Object Model in `pages`, API helper and test data generators in `helpers`, expected values in `test-data`, fixtures in `fixtures/fixtures.ts`. Playwright projects: `api` (no browser, `specs/api`) and `chromium` (`specs/e2e`) |
 | Test data | **Each test creates its own data** through the API (fresh user per worker, own cart). Shared demo accounts are used only for read-only checks |
 | Auth | Login once per worker through the API, reuse `storageState` for UI, bearer token for API |
 | Selectors | `data-test` attributes first, then role/label locators. CSS/XPath only as a last resort |
 | Waiting | Web-first assertions only, no `waitForTimeout` |
 | Configuration | `baseURL` / `API_URL` via `.env`, which lets the same suite target prod, the *with-bugs* variant or a self-hosted Docker env |
 | Flakiness policy | `retries: 2` on CI. A test that passes only on retry is reported as *flaky* and gets fixed or quarantined (`@quarantine`) within 2 days |
-| Code quality | Static analysis on every PR: type check (`tsc --noEmit`, `strict`) and ESLint with `typescript-eslint` and `eslint-plugin-playwright` (catches a missing `await`, `test.only`, `waitForTimeout`). `forbidOnly` on CI, PR review for test code |
+| Code quality | Static analysis on every PR: type check (`npm run typecheck`: `tsc --noEmit`, `strict`) and ESLint (`npm run lint`) with `typescript-eslint` (type-checked rules) and `eslint-plugin-playwright` (catches a missing `await`, `test.only`, `waitForTimeout`). Warnings fail the check (`--max-warnings=0`). `forbidOnly` on CI, PR review for test code |
 
 ## 8. Test management: Testomat.io
 
@@ -182,8 +182,10 @@ tags: TC-CART-003, ui, cart, REQ-CART-02, regression
   `--grep` (e.g. the smoke run is `--grep @smoke`: every test tagged `smoke`). The requirement
   link lives on the case (`REQ-*` tag).
 - **Runs:** CI reports every run to Testomat.io via `@testomatio/reporter` (`TESTOMATIO_TITLE`
-  holds the CI run number and branch). Manual runs of not-yet-automated cases are logged in the
-  same project.
+  holds the CI run number and branch). The reporter is enabled only when `TESTOMATIO` is set. On
+  push to `main`, CI first imports the automated tests (`npm run tms:import`, `check-tests` with
+  `--no-detached`, so that manual cases not automated yet are not marked as detached). Manual runs
+  of not-yet-automated cases are logged in the same project.
 - **Coverage:** Testomat.io shows how many cases exist and how many of them are automated. The
   `REQ-*` tag shows coverage per requirement.
 
@@ -195,8 +197,13 @@ tags: TC-CART-003, ui, cart, REQ-CART-02, regression
 | Push and pull request to `main` | Regression (full functional suite) | Chromium | Yes, for P1 failures |
 | Nightly (cron), from week 5 | Full suite + cross-browser smoke + a11y | Chromium, Firefox, WebKit | Report only |
 
-Workflows are added when they are needed: static analysis and regression come with the first tests (E3-1), nightly with
-the non-functional work (E5). The `@smoke` tag selects a quick subset for local runs.
+Workflows are added when they are needed: static analysis
+([`static-analysis.yml`](../../.github/workflows/static-analysis.yml)) and regression
+([`regression.yml`](../../.github/workflows/regression.yml)) came with the first tests (E3-1),
+nightly comes with the non-functional work (E5). Both PR checks are required by branch protection
+on `main`. While every automated test is P1, the whole regression job is the P1 gate. When P2/P3
+tests are added (E4), P1 tests move to a separate required job. The `@smoke` tag selects a quick
+subset for local runs.
 
 Artifacts: HTML report and traces on failure (30 days), Testomat.io run link in the job summary.
 Secrets (`TESTOMATIO`, test credentials) live in GitHub Secrets only.

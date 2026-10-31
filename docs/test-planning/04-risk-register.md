@@ -3,8 +3,8 @@
 | Field | Value |
 |-------|-------|
 | Document ID | QA-RSK-001 |
-| Version | 1.1 (approved): R-02, R-10 updated for the 5-week plan; R-12 added |
-| Date | 2026-10-25 |
+| Version | 1.2: R-02 occurred in E3-1 (Cloudflare challenge after login) |
+| Date | 2026-10-27 |
 | Review cadence | Weekly, at the QA status sync. Owner updates status and score |
 
 ## Scoring
@@ -23,7 +23,7 @@
 | ID | Risk | Evidence / trigger | L | I | Score | Mitigation | Contingency | Owner | Status |
 |----|------|--------------------|---|---|------:|------------|-------------|-------|--------|
 | R-01 | **Shared public environment**: other users change data, lock accounts or delete entities while our tests run | Observed 2026-10-24: `customer@practicesoftwaretesting.com` locked ("too many failed attempts") | 5 | 4 | 🔴 20 | Every test creates its own data via the API (unique email per worker, own cart/invoices). Seed accounts are used only for read-only checks. No assertions on global counts | Run against a self-hosted Docker env of the same version (Q-06) | QA | Open |
-| R-02 | **Cloudflare challenge blocks UI tests on CI**: headless browsers are detected; GitHub-hosted runners use datacenter IPs that may be challenged as well | Verified locally 2026-10-24: headless Chromium with the default `HeadlessChrome` user agent → 403 "Just a moment..."; the same browser with a regular Chrome user agent → 200, products rendered. Datacenter-IP behaviour not verified yet | 3 | 5 | 🔴 15 | Set a regular Chrome `userAgent` in `playwright.config.ts`. The first CI run in E3-1 (week 2) runs a UI test on GitHub Actions before most UI tests are written. API tests target the API host, which has no challenge | Headed mode via `xvfb-run`; self-hosted env inside the CI job (Docker Compose service); or a self-hosted runner | QA / DevOps | Partially mitigated, checked in W2 |
+| R-02 | **Cloudflare challenge blocks UI tests on CI**: headless browsers are detected; GitHub-hosted runners use datacenter IPs that may be challenged as well | Verified locally 2026-10-24: headless Chromium with the default `HeadlessChrome` user agent → 403 "Just a moment..."; the same browser with a regular Chrome user agent → 200, products rendered. **Occurred 2026-10-27 (E3-1), locally, before CI:** with the regular user agent the first page load passes, but after login the app does a full page load of `/account` (`window.location.href`), which gets a Cloudflare Turnstile challenge (403) in 3 of 3 headless runs; headed Chromium passed 1 of 2 runs. Datacenter-IP behaviour not verified yet | 5 | 5 | 🔴 25 | Regular Chrome `userAgent` in `playwright.config.ts` (enough for single page loads only). API tests target the API host, which has no challenge | Self-hosted env inside the CI job (Docker Compose service), which also removes R-01; headed mode via `xvfb-run` (unreliable locally); or a self-hosted runner | QA / DevOps | Occurred: UI login test fails, fallback to be chosen |
 | R-03 | **No requirements documentation**: expected results may be wrong, causing false passes/failures and rework | No spec available; requirements reverse-engineered | 5 | 3 | 🔴 15 | Baseline requirements in the RTM, approved by the PO during planning; open-questions log (Q-01…Q-06). Tests for unconfirmed rules are marked in the RTM | Treat unconfirmed behaviour as "current behaviour" (characterization tests) and flag it | QA / PO | Open |
 | R-04 | **Periodic database reset**: IDs and seed data change, runs that span the reset fail | Seed records have the current day's `created_at` | 4 | 3 | 🟠 12 | Never hard-code IDs: look up by name/slug at runtime. Schedule nightly away from the reset window (Q-05) | Re-run the failed job automatically once | QA | Open |
 | R-05 | **Flaky tests** erode trust in the suite | Typical for UI suites on shared envs | 3 | 4 | 🟠 12 | Web-first assertions, test isolation, `data-test` selectors, retries only on CI, flaky-rate metric, 2-day quarantine policy | Move to `@quarantine`, exclude from merge gate | QA | Open |
@@ -58,8 +58,8 @@
 
 | Likelihood ↓ / Impact → | 1 | 2 | 3 | 4 | 5 |
 |---|---|---|---|---|---|
-| **5** | | | 🔴 R-03 | 🔴 R-01 | |
+| **5** | | | 🔴 R-03 | 🔴 R-01 | 🔴 R-02 |
 | **4** | | | 🟠 R-04 | | |
-| **3** | 🟢 P-14 | 🟢 R-09 | 🟠 R-06, R-12, P-06 | 🟠 R-05, P-03 | 🔴 R-02, P-01, P-02 |
+| **3** | 🟢 P-14 | 🟢 R-09 | 🟠 R-06, R-12, P-06 | 🟠 R-05, P-03 | 🔴 P-01, P-02 |
 | **2** | | 🟢 P-12, P-13 | 🟢 R-08, R-10, P-10, P-11 | 🟠 R-07, R-11, P-07, P-08, P-09 | 🟠 P-04, P-05 |
 | **1** | | | | | |

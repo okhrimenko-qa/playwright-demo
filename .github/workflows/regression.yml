@@ -1,0 +1,66 @@
+name: Regression
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  regression:
+    name: Regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      COMPOSE_FILE: docker/toolshop.compose.yml
+      BASE_URL: http://localhost:4200
+      API_URL: http://localhost:8091
+      TESTOMATIO: ${{ secrets.TESTOMATIO }}
+      TESTOMATIO_TITLE: 'Regression #${{ github.run_number }} - ${{ github.head_ref || github.ref_name }}'
+    steps:
+      - uses: actions/checkout@v7
+      # Started first, so the containers warm up while dependencies install.
+      - name: Start Toolshop
+        run: docker compose up -d --quiet-pull
+      - uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Seed the Toolshop database
+        run: |
+          for i in $(seq 1 60); do
+            docker compose exec -T mariadb mysqladmin ping -h localhost -u root -proot --silent && break
+            [ "$i" -eq 60 ] && echo "MariaDB did not respond within 2 minutes" && exit 1
+            sleep 2
+          done
+          docker compose exec -T laravel-api php artisan migrate:fresh --seed --force
+      - name: Wait for the Toolshop API and UI
+        run: |
+          for url in "$API_URL/status" "$BASE_URL"; do
+            for i in $(seq 1 60); do
+              curl -sf -o /dev/null "$url" && echo "$url is up" && continue 2
+              sleep 5
+            done
+            echo "$url did not respond within 5 minutes" && exit 1
+          done
+      - name: Import automated tests to Testomat.io
+        if: github.event_name == 'push' && env.TESTOMATIO != ''
+        run: npm run tms:import
+      - run: npx playwright test
+      - name: Runner resources
+        if: ${{ !cancelled() }}
+        run: |
+          nproc
+          free -m
+          docker stats --no-stream
+      - name: Toolshop logs
+        if: failure()
+        run: docker compose logs --tail 200
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30

@@ -198,7 +198,7 @@ responsibilities split in a full team.
 |-------------|------|-------|
 | Test Strategy, Test Plan, RTM, Risk Register, Estimation | W0 (done) | `docs/test-planning/` |
 | Test cases (80) | W1 | `test-cases/<module>/<test-case-title>.test.md`, synced to Testomat.io |
-| Automation framework and test suite | W2 → W5 | `tests/`, `src/` |
+| Automation framework and test suite | W2 → W5 | `specs/`, `pages/`, `helpers/`, `fixtures/`, `test-data/` |
 | CI workflows: regression (W2), nightly (W5) | W2, W5 | `.github/workflows/` |
 | Testomat.io project with test cases and run history | W1 → | Testomat.io |
 | Defect reports | Ongoing | GitHub Issues (`bug` label), linked to TC |
