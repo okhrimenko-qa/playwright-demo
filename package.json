@@ -9,7 +9,10 @@
     "lint": "eslint --max-warnings=0 .",
     "tms:push": "check-tests push -d test-cases",
     "tms:pull": "check-tests pull -d test-cases",
-    "tms:import": "check-tests playwright \"specs/**/*.spec.ts\" --typescript --no-detached"
+    "tms:import": "check-tests playwright \"specs/**/*.spec.ts\" --typescript --no-detached",
+    "project:up": "docker compose -f docker/toolshop.compose.yml up -d",
+    "project:seed": "docker compose -f docker/toolshop.compose.yml exec -T laravel-api php artisan migrate:fresh --seed --force",
+    "project:down": "docker compose -f docker/toolshop.compose.yml down"
   },
   "keywords": [],
   "author": "",

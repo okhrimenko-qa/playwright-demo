@@ -11,9 +11,9 @@ test('Customer logs in with valid credentials via the login form @Ta8031e0b @ui 
   const loginPage = new LoginPage(page);
   const accountPage = new AccountPage(page);
   const {
-    expectedPageTitle,
+    navBarText,
+    accountPageText,
     expectedUrlAfterLogin,
-    getExpectedNavBarText,
   } = testData;
 
   await loginPage.goto();
@@ -28,7 +28,7 @@ test('Customer logs in with valid credentials via the login form @Ta8031e0b @ui 
   await expect(page, 'Page URL should have expected path after login')
     .toHaveURL(expectedUrlAfterLogin);
   await expect(accountPage.pageTitle, 'Page title should have expected text after login')
-    .toHaveText(expectedPageTitle);
+    .toHaveText(accountPageText.title);
   await expect(accountPage.navBar.navMenuDropdown, 'Nav bar should show the user full name')
-    .toHaveText(getExpectedNavBarText(userData));
+    .toHaveText(navBarText.userMenu(userData));
 });

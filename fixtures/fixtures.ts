@@ -1,9 +1,9 @@
 import { test as base, expect } from '@playwright/test';
 import { ApiHelper } from '../helpers/apiHelper';
-import { generateNewUserData } from '../helpers/commonHelper';
 import { LoginPage } from '../pages/login.page';
 import { UserData } from '../interfaces/UserData';
 import { defaultToolshopApiUrl } from '../constants';
+import commonHelper from '../helpers/commonHelper';
 
 export interface Fixtures {
   apiHelper: ApiHelper;
@@ -21,12 +21,12 @@ export const test = base.extend<Fixtures>({
   },
 
   createNewUser: async ({ apiHelper }, use) => {
-    const user = generateNewUserData();
-    const response = await apiHelper.register(user);
+    const userData = commonHelper.generateNewUserData();
+    const response = await apiHelper.register(userData);
     if (response.status() !== 201) {
-      throw new Error(`Registering ${user.email} failed: ${response.status()} ${await response.text()}`);
+      throw new Error(`Registering ${userData.email} failed: ${response.status()} ${await response.text()}`);
     }
-    await use(user);
+    await use(userData);
   },
 
   login: async ({ page, createNewUser: userData }, use) => {
