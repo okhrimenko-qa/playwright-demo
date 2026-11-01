@@ -40,8 +40,9 @@ to avoid that.
 To run against the self-hosted Toolshop as CI does (UI on `:4200`, API on `:8091`):
 
 ```bash
-docker compose -f docker/toolshop.compose.yml up -d
-docker compose -f docker/toolshop.compose.yml exec -T laravel-api php artisan migrate:fresh --seed --force
+npm run project:up                                   # start the containers
+npm run project:seed                                 # reset and seed the database
+npm run project:down                                 # stop the containers
 ```
 
 Then set `BASE_URL=http://localhost:4200` and `API_URL=http://localhost:8091`. CI always runs here,
@@ -60,14 +61,22 @@ and assert against values from `test-data/`.
 - `fixtures/fixtures.ts`: `apiHelper` creates its own request context because in `chromium` the
   `baseURL` points at the UI, so the built-in `request` fixture cannot reach the API. `createNewUser`
   registers a fresh user per test. `login` builds on it and logs in through the UI.
-- `helpers/apiHelper.ts`: API calls, one method per endpoint. Declare the response type here with
-  the generic (`request.post<T>()`, `Promise<APIResponse<T>>`), so specs get a typed `json()` without `as`.
-- `helpers/commonHelper.ts`: generators of unique test data.
+- `helpers/apiHelper.ts`: API calls, one method per endpoint. Methods take camelCase `UserData` and
+  map it to the API payload from `interfaces/api/`. Declare the response type here with the generic
+  (`request.post<T>()`, `Promise<APIResponse<T>>`), so specs get a typed `json()` without `as`.
+- `helpers/commonHelper.ts`: generators of unique test data, exported as a default instance
+  (`commonHelper.generateNewUserData()`).
 - `pages/`: page objects; `pages/fragments/`: parts shared by several pages, composed into a page
   object as a field (`accountPage.navBar`).
 - `test-data/<api|e2e>/<module>/`: expected values, one file per spec mirroring its path, as a
-  default export.
-- `interfaces/`: shared types, one per file.
+  default export. UI text comes from `locales/`: the data file aliases it
+  (`const accountPageText = locales.en.accountPage;`) and exports the alias, so specs use a short
+  `accountPageText.title` instead of the full chain.
+- `locales/<lang>/`: UI text, one file per page or fragment, combined in `locales/index.ts`. Static
+  strings and functions that only format text (`navBarText.userMenu(user)`) go here, and other
+  logic stays in `helpers/`.
+- `constants/`: environment URLs and app routes.
+- `interfaces/`: shared types, one per file; API payloads are in `interfaces/api/`.
 - `test-cases/`: plain-language cases synced with Testomat.io. Follow
   [test-cases/CLAUDE.md](test-cases/CLAUDE.md) when editing them.
 - `docs/test-planning/`: test plan, strategy, RTM, risk register, estimation.
@@ -83,6 +92,11 @@ and assert against values from `test-data/`.
 - Web-first assertions only, no `waitForTimeout`.
 - Page objects expose locators and actions, with no `expect`. Assertions live in specs, and in
   fixtures when a fixture has to confirm its setup succeeded.
+- Scope page object locators to the page root or form: `data-test` values repeat across pages (the
+  register and login forms both have `email` and `password`), so an unscoped locator can act on
+  the previous page before navigation finishes.
+- The address form calls `GET /postcode-lookup` about 300 ms after country, postal code and house
+  number are filled, and overwrites street, city and state with the response.
 - Assert the status before calling `response.json()`, so a non-JSON error shows as a wrong status.
 - Assertion messages state the expectation (`'Login form should disappear after login'`), and only
   where the default output is not self-explanatory.
