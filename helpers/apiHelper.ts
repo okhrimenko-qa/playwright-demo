@@ -1,32 +1,28 @@
-import type { APIRequestContext, APIResponse } from '@playwright/test';
-import { TokenResponse } from '../interfaces/TokenResponse';
-import { CreateUserPayload } from '../interfaces/api/CreateUserPayload';
-import { UserData } from '../interfaces/UserData';
+import type { APIRequestContext } from '@playwright/test';
+import { BrandService } from './services/brand.service';
+import { CartService } from './services/cart.service';
+import { InvoiceService } from './services/invoice.service';
+import { PostcodeService } from './services/postcode.service';
+import { ProductService } from './services/product.service';
+import { ReportService } from './services/report.service';
+import { UserService } from './services/user.service';
 
 export class ApiHelper {
-  constructor(private readonly request: APIRequestContext) { }
+  readonly user: UserService;
+  readonly brand: BrandService;
+  readonly product: ProductService;
+  readonly cart: CartService;
+  readonly invoice: InvoiceService;
+  readonly report: ReportService;
+  readonly postcode: PostcodeService;
 
-  register(userData: UserData): Promise<APIResponse> {
-    const createUserPayload: CreateUserPayload = {
-      first_name: userData.firstName,
-      last_name: userData.lastName,
-      dob: userData.birthDate,
-      phone: userData.phone,
-      email: userData.email,
-      password: userData.password,
-      address: {
-        street: userData.street,
-        city: userData.city,
-        state: userData.state,
-        country: userData.country,
-        postal_code: userData.postalCode
-      }
-    };
-
-    return this.request.post('/users/register', { data: createUserPayload });
-  }
-
-  getUserToken(email: string, password: string): Promise<APIResponse<TokenResponse>> {
-    return this.request.post<TokenResponse>('/users/login', { data: { email, password } });
+  constructor(request: APIRequestContext) {
+    this.user = new UserService(request);
+    this.brand = new BrandService(request);
+    this.product = new ProductService(request);
+    this.cart = new CartService(request);
+    this.invoice = new InvoiceService(request);
+    this.report = new ReportService(request);
+    this.postcode = new PostcodeService(request);
   }
 }

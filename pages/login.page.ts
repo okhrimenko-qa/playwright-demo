@@ -6,10 +6,12 @@ export class LoginPage {
     readonly passwordField: Locator;
     readonly loginButton: Locator;
     readonly loginForm: Locator;
+    readonly loginError: Locator;
 
     constructor(page: Page) {
         this.page = page;
         this.loginForm = this.page.getByTestId('login-form');
+        this.loginError = this.page.getByTestId('login-error');
         this.emailField = this.loginForm.getByTestId('email');
         this.passwordField = this.loginForm.getByTestId('password');
         this.loginButton = this.loginForm.getByTestId('login-submit');

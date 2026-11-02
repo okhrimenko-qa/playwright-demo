@@ -60,22 +60,31 @@ and assert against values from `test-data/`.
   targets `data-test` attributes.
 - `fixtures/fixtures.ts`: `apiHelper` creates its own request context because in `chromium` the
   `baseURL` points at the UI, so the built-in `request` fixture cannot reach the API. `createNewUser`
-  registers a fresh user per test. `login` builds on it and logs in through the UI.
-- `helpers/apiHelper.ts`: API calls, one method per endpoint. Methods take camelCase `UserData` and
-  map it to the API payload from `interfaces/api/`. Declare the response type here with the generic
-  (`request.post<T>()`, `Promise<APIResponse<T>>`), so specs get a typed `json()` without `as`.
+  registers a fresh user per test. `login` builds on it and logs in through the UI. Factories, for
+  tests that need several users or an invoice: `createLoggedInUser` registers a user and returns it
+  with its ID and token, and `createInvoice` creates an invoice for such a user.
+- `helpers/apiHelper.ts`: composes the services into one entry point (`apiHelper.user.register()`).
+- `helpers/services/`: API calls grouped by resource, one method per endpoint, extending
+  `BaseService`. Methods take camelCase `UserData` and map it to the API payload from
+  `interfaces/api/`. Declare the response type here with the generic (`request.post<T>()`,
+  `Promise<APIResponse<T>>`), so specs get a typed `json()` without `as`. Paths come from `apiRoutes`,
+  and IDs are added where the path is used (`${apiRoutes.invoice.invoices}/${id}`).
 - `helpers/commonHelper.ts`: generators of unique test data, exported as a default instance
   (`commonHelper.generateNewUserData()`).
 - `pages/`: page objects; `pages/fragments/`: parts shared by several pages, composed into a page
   object as a field (`accountPage.navBar`).
 - `test-data/<api|e2e>/<module>/`: expected values, one file per spec mirroring its path, as a
-  default export. UI text comes from `locales/`: the data file aliases it
-  (`const accountPageText = locales.en.accountPage;`) and exports the alias, so specs use a short
-  `accountPageText.title` instead of the full chain.
+  default export. Expected values that depend on test data are built here by a function
+  (`getExpectedUserResponse(userData)`), not inline in the spec. Specs destructure the file
+  (`const { getExpectedUserResponse } = testData;`) instead of writing `testData.x`. UI text comes
+  from `locales/`: the data file aliases it (`const accountPageText = locales.en.accountPage;`) and
+  exports the alias, so specs use a short `accountPageText.title` instead of the full chain.
 - `locales/<lang>/`: UI text, one file per page or fragment, combined in `locales/index.ts`. Static
   strings and functions that only format text (`navBarText.userMenu(user)`) go here, and other
   logic stays in `helpers/`.
-- `constants/`: environment URLs and app routes.
+- `constants/`: environment URLs, UI routes (`routes`) and API paths grouped by service (`apiRoutes`).
+  `apiRoutes` holds static strings only, with the base path named after the resource
+  (`invoice.invoices`, not `invoice.all`).
 - `interfaces/`: shared types, one per file; API payloads are in `interfaces/api/`.
 - `test-cases/`: plain-language cases synced with Testomat.io. Follow
   [test-cases/CLAUDE.md](test-cases/CLAUDE.md) when editing them.
@@ -100,7 +109,7 @@ and assert against values from `test-data/`.
 - Assert the status before calling `response.json()`, so a non-JSON error shows as a wrong status.
 - Assertion messages state the expectation (`'Login form should disappear after login'`), and only
   where the default output is not self-explanatory.
-- File names: `*.page.ts`, `*.fragment.ts`, `*.spec.ts` in camelCase; files in `interfaces/` are
+- File names: `*.page.ts`, `*.fragment.ts`, `*.service.ts`, `*.spec.ts` in camelCase; files in `interfaces/` are
   named after the exported type. Folders are kebab-case.
 - A test failing on a known defect is marked `test.fail()` with a link to the defect.
 - Commit messages: `test(<task-index>): <what> <why>`, for example `test(E2-4): add ... to ...`.
