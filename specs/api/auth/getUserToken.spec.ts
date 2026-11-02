@@ -6,7 +6,7 @@ test('Login API returns an access token for valid credentials @Te963a5ed @api @a
   apiHelper,
   createNewUser: userData,
 }) => {
-  const response = await apiHelper.getUserToken(userData.email, userData.password);
+  const response = await apiHelper.user.getToken(userData.email, userData.password);
   const body = await response.json();
   const { expectedUserTokenSchema, expectedUserTokenType } = testData;
 

@@ -1,14 +1,11 @@
-import { UserData } from "../../../interfaces/UserData";
+import { locales } from "../../../locales";
 
 const expectedUrlAfterLogin = /\/account$/;
-const expectedPageTitle = 'My account';
-
-function getExpectedNavBarText(customer: UserData): string {
-    return `${customer.first_name} ${customer.last_name}`;
-}
+const accountPageText = locales.en.accountPage;
+const navBarText = locales.en.navBar;
 
 export default {
+    navBarText,
+    accountPageText,
     expectedUrlAfterLogin,
-    expectedPageTitle,
-    getExpectedNavBarText,
 }

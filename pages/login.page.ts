@@ -1,31 +1,29 @@
 import { Locator, Page } from "@playwright/test";
 
 export class LoginPage {
-    public readonly page: Page;
-    public readonly emailField: Locator;
-    public readonly passwordField: Locator;
-    public readonly loginButton: Locator;
-    public readonly loginForm: Locator;
+    readonly page: Page;
+    readonly emailField: Locator;
+    readonly passwordField: Locator;
+    readonly loginButton: Locator;
+    readonly loginForm: Locator;
+    readonly loginError: Locator;
 
     constructor(page: Page) {
         this.page = page;
-        this.emailField = page.getByTestId('email');
-        this.passwordField = page.getByTestId('password');
-        this.loginButton = page.getByTestId('login-submit');
-        this.loginForm = page.getByTestId('login-form');
+        this.loginForm = this.page.getByTestId('login-form');
+        this.loginError = this.page.getByTestId('login-error');
+        this.emailField = this.loginForm.getByTestId('email');
+        this.passwordField = this.loginForm.getByTestId('password');
+        this.loginButton = this.loginForm.getByTestId('login-submit');
     }
 
-    public async goto(): Promise<void> {
+    async goto(): Promise<void> {
         await this.page.goto('/auth/login');
     }
 
-    public async login(username: string, password: string): Promise<void> {
+    async login(username: string, password: string): Promise<void> {
         await this.emailField.fill(username);
         await this.passwordField.fill(password);
         await this.loginButton.click();
-    }
-
-    public async isEmailFieldVisible(): Promise<boolean> {
-        return await this.emailField.isVisible();
     }
 }

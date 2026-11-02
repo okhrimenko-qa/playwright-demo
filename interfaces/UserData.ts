@@ -1,6 +1,14 @@
 export interface UserData {
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
+  birthDate: string;
+  country: string;
+  postalCode: string;
+  houseNumber: string;
+  street: string;
+  city: string;
+  state: string;
+  phone: string;
 }

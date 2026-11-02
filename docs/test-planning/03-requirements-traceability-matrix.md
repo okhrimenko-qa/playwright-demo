@@ -29,16 +29,16 @@
 
 | REQ ID | Requirement | Pri | TC ID | Test case | Level | Suite | Status |
 |--------|-------------|-----|-------|-----------|-------|-------|--------|
-| REQ-AUTH-01 | A visitor can register a customer account with valid data | P1 | TC-AUTH-001 | Register via UI form → redirected to login, can sign in | UI | | Planned |
-| REQ-AUTH-01 | | P1 | TC-AUTH-002 | `POST /users/register` valid payload → 201, body matches `UserResponse`, no password in body | API | | Planned |
+| REQ-AUTH-01 | A visitor can register a customer account with valid data | P1 | TC-AUTH-001 | Register via UI form → redirected to login, can sign in | UI | | Automated |
+| REQ-AUTH-01 | | P1 | TC-AUTH-002 | `POST /users/register` valid payload → 201, body matches `UserResponse`, no password in body | API | | Automated |
 | REQ-AUTH-02 | Password must be ≥ 8 chars and contain upper, lower, digit and symbol | P2 | TC-AUTH-003 | Data-driven: each violated rule → 422 with the matching message; 7 vs 8 chars boundary | API | | Planned |
 | REQ-AUTH-02 | | P2 | TC-AUTH-004 | Registration form shows password-rule errors inline and blocks submit | UI | | Planned |
 | REQ-AUTH-03 | Registering with an already-used email is rejected | P2 | TC-AUTH-005 | Register same email twice → second call rejected (409/422), no duplicate account | API | | Planned |
 | REQ-AUTH-04 | Postal code is validated against the selected country | P3 | TC-AUTH-006 | Invalid postal code for country → 422 `address.postal_code` | API | | Planned |
 | REQ-AUTH-05 | A customer can log in with valid credentials | P1 | TC-AUTH-007 | Login via UI → "My account" page, user name in header | UI | S | Planned |
 | REQ-AUTH-05 | | P1 | TC-AUTH-008 | `POST /users/login` → 200, `access_token` (JWT), `token_type`, `expires_in` | API | S | Planned |
-| REQ-AUTH-06 | Invalid credentials are rejected with a generic error (no user enumeration) | P1 | TC-AUTH-009 | Wrong password / unknown email → same generic UI error | UI | | Planned |
-| REQ-AUTH-06 | | P1 | TC-AUTH-010 | Wrong password and unknown email both → 401 with identical body | API | | Planned |
+| REQ-AUTH-06 | Invalid credentials are rejected with a generic error (no user enumeration) | P1 | TC-AUTH-009 | Wrong password / unknown email → same generic UI error | UI | | Automated |
+| REQ-AUTH-06 | | P1 | TC-AUTH-010 | Wrong password and unknown email both → 401 with identical body | API | | Automated |
 | REQ-AUTH-07 | The account is locked after repeated failed login attempts | P2 | TC-AUTH-011 | Fresh user: N failed attempts → "Account locked"; correct password then also rejected | API | | Planned |
 | REQ-AUTH-08 | Logout invalidates the session token | P2 | TC-AUTH-012 | `GET /users/logout` → old token on `/users/me` → 401 | API | | Planned |
 | REQ-AUTH-08 | | P2 | TC-AUTH-013 | Sign out via UI → protected page redirects to login | UI | | Planned |
@@ -53,8 +53,8 @@
 | REQ-ACC-01 | A customer can view and update their profile | P2 | TC-ACC-001 | Edit profile (phone, address) via UI → saved and shown after reload | UI | | Planned |
 | REQ-ACC-01 | | P2 | TC-ACC-002 | `GET /users/me` returns own profile, matches `UserResponse` | API | | Planned |
 | REQ-ACC-02 | A customer can change their password | P2 | TC-ACC-003 | Change password → old password fails, new password works | API | | Planned |
-| REQ-ACC-03 | A customer can access only their own data (object-level authorization) | P1 | TC-ACC-004 | Customer A requests user B / invoice B by ID → 403/404, no data leaked | API | | Planned |
-| REQ-ACC-03 | A customer cannot use admin endpoints (role-level authorization) | P1 | TC-ACC-005 | Customer token on `GET /users`, `DELETE /brands/{id}`, `/reports/*` → 403 | API | S | Planned |
+| REQ-ACC-03 | A customer can access only their own data (object-level authorization) | P1 | TC-ACC-004 | Customer A requests user B / invoice B by ID → 403/404, no data leaked | API | | Automated |
+| REQ-ACC-03 | A customer cannot use admin endpoints (role-level authorization) | P1 | TC-ACC-005 | Customer token on `GET /users`, `DELETE /brands/{id}`, `/reports/*` → 403 | API | S | Automated |
 
 ## 3. Product catalog (CAT)
 
