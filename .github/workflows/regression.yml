@@ -5,6 +5,12 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      grep:
+        description: 'Run only tests whose title matches, for example @smoke (empty runs all)'
+        required: false
+        default: ''
 
 concurrency:
   group: regression-${{ github.ref }}
@@ -51,7 +57,9 @@ jobs:
       - name: Import automated tests to Testomat.io
         if: github.event_name == 'push' && env.TESTOMATIO != ''
         run: npm run tms:import
-      - run: npx playwright test
+      - run: npx playwright test ${GREP:+--grep "$GREP"}
+        env:
+          GREP: ${{ inputs.grep }}
       - name: Runner resources
         if: ${{ !cancelled() }}
         run: |
